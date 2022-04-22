@@ -190,7 +190,8 @@ def setup_sourcegrid(args, comm, size, rank):
         plot_sourcegrid(sourcegrid,
                         outfile=os.path.join(config['project_path'],
                                              'sourcegrid.png'),
-                        proj=ccrs.PlateCarree)
+                        proj=ccrs.PlateCarree,
+                        size=0.5)
     except NameError:
         pass
 
