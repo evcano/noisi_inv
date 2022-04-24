@@ -11,6 +11,7 @@ Window functions for measurements
 
 import numpy as np
 from warnings import warn
+from obspy.signal.filter import envelope
 
 
 def my_centered(arr, newsize):
@@ -102,6 +103,51 @@ def get_window(stats, g_speed, params):
     
         ind_lo_n = ind_hi + int(params['sep_noise'] * params['hw'] * Fs)
         ind_hi_n = ind_lo_n + int(2 * params['hw'] * Fs) + 1
+
+    # Checks..overlap, out of bounds
+    scs = window_checks(ind_lo, ind_hi, ind_lo_n,
+                        ind_hi_n, n, params['win_overlap'])
+
+    if scs:
+        # Fill signal window
+        win_signal = window(params['wtype'], n, ind_lo, ind_hi)
+        # Fill noise window
+        win_noise = window(params['wtype'], n, ind_lo_n, ind_hi_n)
+
+        return win_signal, win_noise, scs
+
+    else:
+        return np.zeros(n), np.zeros(n), scs
+
+
+def get_window_peak_envelope(tr, minperiod, maxperiod, params):
+    n = tr.stats.npts
+    Fs = tr.stats.sampling_rate
+
+    # window is computed on the causal branch and mirrored to the acausal
+    branch_npts = (tr.stats.npts - 1) / 2
+    maxlag = branch_npts * tr.stats.delta
+    caus_branch = tr.slice(starttime=(tr.stats.starttime + maxlag),
+                           endtime=tr.stats.endtime)
+
+    # window is centered at maximum of envelope
+    env = envelope(caus_branch.data)
+    idx = np.argmax(env)
+
+    # window duration is 5 times central period
+    T = (minperiod + maxperiod) / 2.
+    half_win = 2.5 * T
+
+    Tn = T // caus_branch.stats.delta
+    half_win_n = int(2.5 * Tn)
+
+    # get signal window limits
+    ind_lo = idx - half_win_n
+    ind_hi = idx + half_win_n
+
+    # get noise window limits
+    ind_lo_n = ind_hi + int(params['sep_noise'] * half_win * Fs)
+    ind_hi_n = ind_lo_n + int(2 * half_win * Fs) + 1
 
     # Checks..overlap, out of bounds
     scs = window_checks(ind_lo, ind_hi, ind_lo_n,
