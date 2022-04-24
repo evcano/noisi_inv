@@ -125,13 +125,13 @@ def get_window_peak_envelope(tr, minperiod, maxperiod, params):
     Fs = tr.stats.sampling_rate
 
     # window is computed on the causal branch and mirrored to the acausal
-    branch_npts = (tr.stats.npts - 1) / 2
+    branch_npts = int((tr.stats.npts - 1) / 2)
     maxlag = branch_npts * tr.stats.delta
     caus_branch = tr.slice(starttime=(tr.stats.starttime + maxlag),
                            endtime=tr.stats.endtime)
 
     # window is centered at maximum of envelope
-    env = envelope(caus_branch.data)
+    env = caus_branch.data ** 2.0
     idx = np.argmax(env)
 
     # window duration is 5 times central period
@@ -142,8 +142,8 @@ def get_window_peak_envelope(tr, minperiod, maxperiod, params):
     half_win_n = int(2.5 * Tn)
 
     # get signal window limits
-    ind_lo = idx - half_win_n
-    ind_hi = idx + half_win_n
+    ind_lo = np.maximum(idx - half_win_n + branch_npts, branch_npts + 1)
+    ind_hi = idx + half_win_n + branch_npts
 
     # get noise window limits
     ind_lo_n = ind_hi + int(params['sep_noise'] * half_win * Fs)
