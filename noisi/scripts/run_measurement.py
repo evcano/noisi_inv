@@ -17,7 +17,7 @@ from obspy import read, Trace, Stream
 from obspy.geodetics import gps2dist_azimuth
 from noisi.scripts import measurements as rm
 from noisi.scripts import adjnt_functs as am
-from noisi.util.windows import my_centered, snratio
+from noisi.util.windows import my_centered, snratio, get_window
 from noisi.util.corr_pairs import get_synthetics_filename
 from warnings import warn
 
@@ -150,10 +150,14 @@ def measurement(comm,size,rank,source_config, mtype, step, ignore_net,
         # Weight observed stack by nstack
         tr_o.data /= tr_o.stats.sac.user0
 
+        # Get the windows
+        win_o = get_window(tr_o.stats, g_speed, window_params)
+        win_s = get_window(tr_s.stats, g_speed, window_params)
+
         # Take the measurement
         func = rm.get_measure_func(mtype)
-        msr_o = func(tr_o, **options)
-        msr_s = func(tr_s, **options)
+        msr_o = func(tr_o, win_o, **options)
+        msr_s = func(tr_s, win_s, **options)
 
         # Get the adjoint source
         adjt_func = am.get_adj_func(mtype)

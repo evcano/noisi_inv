@@ -17,7 +17,7 @@ except ImportError:
     pass
 
 
-def square_envelope(correlation, g_speed, window_params):
+def square_envelope(correlation, window, g_speed, window_params):
 
     square_envelope = correlation.data**2 + \
         np.imag(hilbert(correlation.data))**2
@@ -27,7 +27,7 @@ def square_envelope(correlation, g_speed, window_params):
     return square_envelope
 
 
-def envelope(correlation, g_speed, window_params):
+def envelope(correlation, window, g_speed, window_params):
     
     envelope = np.sqrt(correlation.data ** 2 + np.imag(hilbert(correlation.data)) ** 2)
     
@@ -38,8 +38,7 @@ def envelope(correlation, g_speed, window_params):
 
 
 
-def windowed_waveform(correlation, g_speed, window_params):
-    window = get_window(correlation.stats, g_speed, window_params)
+def windowed_waveform(correlation, window, g_speed, window_params):
     win = window[0]
     if window[2]:
         win_caus = (correlation.data * win)
@@ -50,13 +49,12 @@ def windowed_waveform(correlation, g_speed, window_params):
     return msr
 
 
-def full_waveform(correlation, **kwargs):
+def full_waveform(correlation, window, **kwargs):
     return(correlation.data)
 
 
-def energy(correlation, g_speed, window_params):
+def energy(correlation, window, g_speed, window_params):
 
-    window = get_window(correlation.stats, g_speed, window_params)
     msr = [np.nan, np.nan]
     win = window[0]
 
@@ -77,9 +75,8 @@ def energy(correlation, g_speed, window_params):
     return np.array(msr)
 
 
-def log_en_ratio(correlation, g_speed, window_params):
+def log_en_ratio(correlation, window, g_speed, window_params):
     delta = correlation.stats.delta
-    window = get_window(correlation.stats, g_speed, window_params)
     win = window[0]
 
     if window[2]:
@@ -107,9 +104,8 @@ def log_en_ratio(correlation, g_speed, window_params):
     return msr
 
 
-def log_en_ratio_sqr(correlation, g_speed, window_params):
+def log_en_ratio_sqr(correlation, window, g_speed, window_params):
     delta = correlation.stats.delta
-    window = get_window(correlation.stats, g_speed, window_params)
     win = window[0]
 
     if window[2]:
@@ -136,9 +132,8 @@ def log_en_ratio_sqr(correlation, g_speed, window_params):
         msr = np.nan
     return msr
 
-def log_en_ratio_cube(correlation, g_speed, window_params):
+def log_en_ratio_cube(correlation, window, g_speed, window_params):
     delta = correlation.stats.delta
-    window = get_window(correlation.stats, g_speed, window_params)
     win = window[0]
 
     if window[2]:
