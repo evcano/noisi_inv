@@ -17,7 +17,7 @@ from obspy import read, Trace, Stream
 from obspy.geodetics import gps2dist_azimuth
 from noisi.scripts import measurements as rm
 from noisi.scripts import adjnt_functs as am
-from noisi.util.windows import my_centered, snratio, get_window
+from noisi.util.windows import my_centered, snratio, get_window, get_window_peak_envelope
 from noisi.util.corr_pairs import get_synthetics_filename
 from warnings import warn
 
@@ -151,8 +151,19 @@ def measurement(comm,size,rank,source_config, mtype, step, ignore_net,
         tr_o.data /= tr_o.stats.sac.user0
 
         # Get the windows
-        win_o = get_window(tr_o.stats, g_speed, window_params)
-        win_s = get_window(tr_s.stats, g_speed, window_params)
+        if options['window_params']['peak_envelope']:
+            win_o = get_window_peak_envelope(tr_o,
+                                             1./bandpass[1],
+                                             1./bandpass[0],
+                                             options['window_params'])
+
+            win_s = get_window_peak_envelope(tr_s,
+                                             1./bandpass[1],
+                                             1./bandpass[0],
+                                             options['window_params'])
+        else:
+            win_o = get_window(tr_o.stats, g_speed, window_params)
+            win_s = get_window(tr_s.stats, g_speed, window_params)
 
         # Take the measurement
         func = rm.get_measure_func(mtype)
@@ -266,7 +277,13 @@ def run_measurement(args, comm, size, rank):
     window_params['win_overlap'] = measr_config['window_params_win_overlap']
     window_params['wtype'] = measr_config['window_params_wtype']
     window_params['plot'] = measr_config['window_plot_measurements']
-    
+
+    # windowing routine
+    try:
+        window_params['peak_envelope'] = measr_config['window_peak_envelope']
+    except:
+        window_params['peak_envelope'] = False
+
     # variable window
     try:
         window_params['hw_variable'] = measr_config['window_params_hw_variable']
