@@ -377,9 +377,26 @@ comm.barrier()
 ########################################################################
 
 if rank == 0:
-    print("Setting up sourcegrid..")
-    # create the source grid
-    setup_sourcegrid(inv_args, comm, size, rank)
+    create_src_flag = 0
+
+    if 'sourcegrid' in inv_config['main'].keys():
+        if inv_config['main']['sourcegrid']:
+            print('Copying sourcegrid ...')
+            dst = os.path.join(config_proj["project_path"], "sourcegrid.npy")
+            shutil.copy(inv_config['main']['sourcegrid'], dst)
+            create_src_flag += 1
+
+    if 'sourcegrid_voronoi' in inv_config['main'].keys():
+        if inv_config['main']['sourcegrid_voronoi']:
+            print('Copying sourcegrid voronoi ...')
+            dst = os.path.join(config_proj['project_path'], 'sourcegrid_voronoi.npy')
+            shutil.copy(inv_config['main']['sourcegrid_voronoi'], dst)
+            create_src_flag += 1
+
+    if create_src_flag != 2:
+        # create the source grid
+        print("Setting up sourcegrid..")
+        setup_sourcegrid(inv_args, comm, size, rank)
 
 comm.barrier()
 
