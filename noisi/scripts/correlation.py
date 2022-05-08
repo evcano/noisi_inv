@@ -364,7 +364,13 @@ def compute_correlation(input_files, all_conf, nsrc, all_ns, taper,
         S_all = None
         wf1_data = wf1.data
         wf2_data = wf2.data
-    
+
+    # evcano
+    save_tmp_correlation = True
+
+    # save correlation at grid points on a binary file
+    if save_tmp_correlation:
+        all_tmp_correlation = np.zeros((ntraces, n_corr), dtype='float32')
     
     for i in range(ntraces):
 
@@ -416,12 +422,38 @@ def compute_correlation(input_files, all_conf, nsrc, all_ns, taper,
         c = np.multiply(g1g2_tr, S)
 
         # transform back
-        correlation += my_centered(np.fft.fftshift(np.fft.irfft(c, n)),
-                                   n_corr) * nsrc.surf_area[i]
+        tmp_correlation = my_centered(np.fft.fftshift(np.fft.irfft(c, n)),
+                                      n_corr) * nsrc.surf_area[i]
+
+        tmp_correlation = tmp_correlation.astype('float32')
+
+        # integrate over space
+        correlation += tmp_correlation
+
+        # save correlation at the grid point
+        if save_tmp_correlation:
+            all_tmp_correlation[i, :] = tmp_correlation
+
         # occasional info
         if i % print_each_n == 0 and all_conf.config['verbose']:
             print("Finished {} of {} source locations.".format(i, ntraces))
 # end of loop over all source locations #######################################
+
+    # save correlation at grid points on a binary file
+    if save_tmp_correlation:
+        binfile_path = os.path.join(all_conf.source_config['source_path'],
+                                    'iteration_{}'.format(all_conf.step),
+                                    'corr_bin')
+
+        if not os.path.isdir(binfile_path):
+            os.makedirs(binfile_path)
+
+        correlation_binfile = os.path.join(binfile_path,
+                                           '{}_{}.bin'.format(station1, station2))
+
+        with open(correlation_binfile, 'wb') as binfile:
+            all_tmp_correlation.tofile(binfile)
+
     return(correlation, station1, station2)
 
 
