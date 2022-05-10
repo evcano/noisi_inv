@@ -15,10 +15,9 @@ from scipy.signal import hilbert
 from math import log
 
 
-def log_en_ratio_adj(corr_o, corr_s, g_speed, window_params):
+def log_en_ratio_adj(corr_o, corr_s, window, g_speed, window_params):
 
     success = False
-    window = wn.get_window(corr_o.stats, g_speed, window_params)
     win = window[0]
 
     wn.my_centered(corr_s.data, corr_o.stats.npts)
@@ -51,10 +50,9 @@ def log_en_ratio_adj(corr_o, corr_s, g_speed, window_params):
         adjt_src = win - win + np.nan
     return adjt_src, success
 
-def log_en_ratio_sqr_adj(corr_o, corr_s, g_speed, window_params):
+def log_en_ratio_sqr_adj(corr_o, corr_s, window, g_speed, window_params):
 
     success = False
-    window = wn.get_window(corr_o.stats, g_speed, window_params)
     win = window[0]
 
     wn.my_centered(corr_s.data, corr_o.stats.npts)
@@ -88,10 +86,9 @@ def log_en_ratio_sqr_adj(corr_o, corr_s, g_speed, window_params):
     return adjt_src, success
 
 
-def log_en_ratio_cube_adj(corr_o, corr_s, g_speed, window_params):
+def log_en_ratio_cube_adj(corr_o, corr_s, window, g_speed, window_params):
 
     success = False
-    window = wn.get_window(corr_o.stats, g_speed, window_params)
     win = window[0]
 
     wn.my_centered(corr_s.data, corr_o.stats.npts)
@@ -126,10 +123,9 @@ def log_en_ratio_cube_adj(corr_o, corr_s, g_speed, window_params):
 
 
 
-def windowed_waveform(corr_o, corr_s, g_speed, window_params):
+def windowed_waveform(corr_o, corr_s, window, g_speed, window_params):
 
     success = False
-    window = wn.get_window(corr_o.stats, g_speed, window_params)
     win = window[0] + window[0][::-1]
     if window[2]:
 
@@ -144,12 +140,12 @@ def windowed_waveform(corr_o, corr_s, g_speed, window_params):
     return adjt_src, success
 
 
-def full_waveform(corr_o, corr_s, **kwargs):
+def full_waveform(corr_o, corr_s, window, **kwargs):
     adjt_src = corr_s.data - corr_o.data
     return adjt_src, 1
 
 
-def square_envelope(corr_o, corr_s, g_speed,
+def square_envelope(corr_o, corr_s, window, g_speed,
                     window_params):
     success = False
     env_s = corr_s.data**2 + np.imag(hilbert(corr_s.data))**2
@@ -178,10 +174,9 @@ def square_envelope(corr_o, corr_s, g_speed,
     return adjt_src, success
 
 
-def energy(corr_o, corr_s, g_speed, window_params):
+def energy(corr_o, corr_s, window, g_speed, window_params):
 
     success = False
-    window = wn.get_window(corr_o.stats, g_speed, window_params)
 
     win = window[0]
     if window[2]:
@@ -195,7 +190,7 @@ def energy(corr_o, corr_s, g_speed, window_params):
     return adjt_src, success
 
 
-def envelope_difference(corr_o, corr_s, g_speed, window_params):
+def envelope_difference(corr_o, corr_s, window, g_speed, window_params):
     """
     From Korbinian
     """

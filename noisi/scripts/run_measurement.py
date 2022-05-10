@@ -152,27 +152,21 @@ def measurement(comm,size,rank,source_config, mtype, step, ignore_net,
 
         # Get the windows
         if options['window_params']['peak_envelope']:
-            win_o = get_window_peak_envelope(tr_o,
-                                             1./bandpass[1],
-                                             1./bandpass[0],
-                                             options['window_params'])
-
-            win_s = get_window_peak_envelope(tr_s,
-                                             1./bandpass[1],
-                                             1./bandpass[0],
-                                             options['window_params'])
+            win = get_window_peak_envelope(tr_o,
+                                           1./bandpass[1],
+                                           1./bandpass[0],
+                                           options['window_params'])
         else:
-            win_o = get_window(tr_o.stats, g_speed, window_params)
-            win_s = get_window(tr_s.stats, g_speed, window_params)
+            win = get_window(tr_o.stats, g_speed, window_params)
 
         # Take the measurement
         func = rm.get_measure_func(mtype)
-        msr_o = func(tr_o, win_o, **options)
-        msr_s = func(tr_s, win_s, **options)
+        msr_o = func(tr_o, win, **options)
+        msr_s = func(tr_s, win, **options)
 
         # Get the adjoint source
         adjt_func = am.get_adj_func(mtype)
-        adjt, success = adjt_func(tr_o, tr_s, **options)
+        adjt, success = adjt_func(tr_o, tr_s, win, **options)
         
         #scaling to avoid tiny numbers for waveform measurements 
         if mtype in ['square_envelope','full_waveform', 'windowed_waveform','envelope']:
