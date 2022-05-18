@@ -1,6 +1,10 @@
 main:
     output_folder: ./noisi_output
     stationlist: /Users/jigel/noisi/stationlists/stationlist_synth_mfp_30deg.csv 
+    sourcegrid: null
+    sourcegrid_voronoi: null
+    starting_model: null
+    spectral_model: null
     add_metadata: false
     add_noise: false
     output_plot: true
@@ -135,6 +139,7 @@ measr_config:
     weights: [1.0]
     g_speed: 2700
     waterlevel_perc: 0
+    window_peak_envelope: true
     window_params_wtype: "hann"
     window_params_hw: 30
     window_params_hw_variable: 100

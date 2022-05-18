@@ -683,6 +683,22 @@ if rank==0:
 ########################################################################
 # Begin inversion, first check for already computed iterations
 ########################################################################
+if rank == 0:
+    if 'starting_model' in inv_config['main'].keys() and inv_config['main']['starting_model']:
+        print('Copying user-provided starting_model.h5')
+        dst = os.path.join(config_proj['project_path'], 'source_1',
+                           'iteration_0', 'starting_model.h5')
+        shutil.copy(inv_config['main']['starting_model'], dst)
+        print('starting_model.h5 copied')
+
+    if 'spectral_model' in inv_config['main'].keys() and inv_config['main']['spectral_model']:
+        print('Copying user-provided spectral_model.h5')
+        dst = os.path.join(config_proj['project_path'], 'source_1',
+                           'spectral_model.h5')
+        shutil.copy(inv_config['main']['spectral_model'], dst)
+        print('spectral_model.h5 copied')
+
+comm.barrier()
 
 # check for already calculated iterations
 models = glob(os.path.join(inv_args.source_model,'iteration*.h5'))
